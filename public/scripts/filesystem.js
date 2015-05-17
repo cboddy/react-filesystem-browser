@@ -22,7 +22,7 @@ function buildUrl(path) {
 
 var FileList = React.createClass({
         getInitialState: function() {
-                return {path : "/",
+                return {paths : ["/"],
                         files: []};
         },
 
@@ -33,16 +33,36 @@ var FileList = React.createClass({
             cache: false,
             success: function(data) {
                     var files = data.children;
-                    this.setState({path: path, files: files});
+                    var paths = this.state.paths; 
+                    if (paths[paths.length-1] != path)
+                        paths = paths.concat([path]) 
+                    this.setState({files: files, paths: paths});
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
             }.bind(this)
             });
     },
+    
+    currentPath : function() {
+            return this.state.paths[this.state.paths.length-1]
+    },
 
+    onBack : function() {
+        if (this.state.paths.length <2) {
+            alert("Cannot go back from "+ this.currentPath());
+            return;
+        }
+        this.state.paths = this.state.paths.slice(0,-1);
+        this.loadFilesFromServer(this.currentPath());
+    },
+    onUpload: function() {
+
+    },
     componentDidMount: function() {
-            this.loadFilesFromServer(this.state.path)
+            this.loadFilesFromServer(this.currentPath());
+            var backButton = document.getElementById("backButton")
+            backButton.onclick = this.onBack;
     },
 
     timeSort: function() {
