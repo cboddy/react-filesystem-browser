@@ -14,7 +14,6 @@ var File = React.createClass({
 File.timeSort = function(left, right){return left.time - right.time;} 
 File.sizeSort = function(left, right){return left.size - right.size;} 
 File.pathSort = function(left, right){return left.path.localeCompare(right.path);} 
-
 File.invert = function(sort) {return -1* sort();}
 
 function buildUrl(path) {

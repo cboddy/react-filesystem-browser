@@ -1,16 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hello React</title>
-    <!-- Not present in the tutorial. Just for basic styling. -->
+    <title>Filesystem</title>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
     <script src="scripts/react.js"></script>
     <script src="scripts/JSXTransformer.js"></script>
     <script src="scripts/jquery.min.js"></script>
     <script src="scripts/marked.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
   </head>
   <body>
+
+                <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+                        <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#example-navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                </button>
+                                <a class="navbar-brand" href="#">Filesystem</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                        <li><a href="#feedsTop">Back</a></li>
+                                        <li><a href="#articlesTop">Upload</a></li>
+                                </ul>
+
+                                <div id="login-form" class="navbar-form navbar-right">
+                                        <div  class="form-group" onkeypress="loginOnEnter(event)">
+                                                <input placeholder="Email" id="login-user-input" class="form-control" type="text">
+                                        </div>
+                                                <div class="form-group" onkeypress="loginOnEnter(event)">
+                                                        <input placeholder="Password" id="login-password-input" class="form-control" type="password">
+                                                </div>
+                                                <button class="btn btn-success" >Sign in</button>
+                                </div>
+                        </div>
+                </nav>
+
+    <h1>&nbsp;</h1>
     <div id="content"></div>
     <script type="text/jsx;harmony=true" src="scripts/filesystem.js"></script>
   </body>
