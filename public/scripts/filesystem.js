@@ -14,10 +14,13 @@ var File = React.createClass({
 File.timeSort = function(left, right){return left.time - right.time;} 
 File.sizeSort = function(left, right){return left.size - right.size;} 
 File.pathSort = function(left, right){return left.path.localeCompare(right.path);} 
-File.invert = function(sort) {return -1* sort();}
 
-function buildUrl(path) {
+function buildGetChildrenUrl(path) {
     return  "children?path="+path;
+}
+
+function buildGetContentUrl(path) {
+    return "content?path="+path;
 }
 
 var FileList = React.createClass({
@@ -28,7 +31,7 @@ var FileList = React.createClass({
 
     loadFilesFromServer: function(path) {
             $.ajax({
-                    url: buildUrl(path),
+                    url: buildGetChildrenUrl(path),
             dataType: 'json',
             cache: false,
             success: function(data) {
@@ -77,11 +80,19 @@ var FileList = React.createClass({
     updatePath: function(path) {
         this.loadFilesFromServer(path);
     },
+    getContent: function(path) {
+       var url = buildGetContentUrl(path);
+       console.log("path "+ path +" url "+ url);
+        $.get({url: url});
+    },
     render: function() {
             var files = this.state.files.map(function(f) {
-                    var onClick = function(event){
+                    var onClick = f.isdir ? function(event){
                             this.updatePath(f.path);
-                    }.bind(this)
+                    }.bind(this) :
+                            function(event) {
+                                this.getContent(f.path);
+                            }.bind(this)
                     return (<File onClick={onClick} path={f.path} isdir={f.isdir} size={f.size} time={f.time}/>)
             }.bind(this));
             

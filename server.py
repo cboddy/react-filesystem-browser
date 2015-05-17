@@ -19,7 +19,8 @@ def get_path():
 
 @app.route("/content")
 def get_content():
-    pass
+    p = request.args.get("path")
+    return app.send_file(p)
 
 @app.route("/children")
 def get_children():
