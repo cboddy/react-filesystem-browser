@@ -2,12 +2,12 @@
 var File = React.createClass({
         render: function() {
                 var dateString =  new Date(this.props.time*1000).toGMTString()
-                var className = this.props.isdir ? "label-info" : "";
-                return (<tr onClick={this.props.onClick} className={className} ref={this.props.path} >
-                        <td>{this.props.path}</td>
-                        <td>{this.props.size}</td>
-                        <td>{dateString}</td>
-                        </tr>);
+        var className = this.props.isdir ? "label-info" : "";
+return (<tr onClick={this.props.onClick} className={className} ref={this.props.path} >
+        <td>{this.props.path}</td>
+        <td>{this.props.size}</td>
+        <td>{dateString}</td>
+        </tr>);
         }
 });
 
@@ -16,17 +16,18 @@ File.sizeSort = function(left, right){return left.size - right.size;}
 File.pathSort = function(left, right){return left.path.localeCompare(right.path);} 
 
 function buildGetChildrenUrl(path) {
-    return  "children?path="+path;
+        return  "children?path="+path;
 }
 
 function buildGetContentUrl(path) {
-    return "content?path="+path;
+        return "content?path="+path;
 }
 
 var FileList = React.createClass({
         getInitialState: function() {
                 return {paths : ["/"],
-                        files: []};
+                        files: [],
+                        sort: File.pathSort};
         },
 
     loadFilesFromServer: function(path) {
@@ -35,29 +36,32 @@ var FileList = React.createClass({
             dataType: 'json',
             cache: false,
             success: function(data) {
-                    var files = data.children;
+                    var files = data.children.sort(this.state.sort);
                     var paths = this.state.paths; 
                     if (paths[paths.length-1] != path)
-                        paths = paths.concat([path]) 
-                    this.setState({files: files, paths: paths});
+                    paths = paths.concat([path]) 
+                    this.setState(
+                            {files: files, 
+                                    paths: paths,
+                                    sort: this.state.sort});
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
             }.bind(this)
             });
     },
-    
+
     currentPath : function() {
             return this.state.paths[this.state.paths.length-1]
     },
 
     onBack : function() {
-        if (this.state.paths.length <2) {
-            alert("Cannot go back from "+ this.currentPath());
-            return;
-        }
-        this.state.paths = this.state.paths.slice(0,-1);
-        this.loadFilesFromServer(this.currentPath());
+            if (this.state.paths.length <2) {
+                    alert("Cannot go back from "+ this.currentPath());
+                    return;
+            }
+            this.state.paths = this.state.paths.slice(0,-1);
+            this.loadFilesFromServer(this.currentPath());
     },
     onUpload: function() {
 
@@ -65,25 +69,39 @@ var FileList = React.createClass({
     componentDidMount: function() {
             this.loadFilesFromServer(this.currentPath());
             var backButton = document.getElementById("backButton")
-            backButton.onclick = this.onBack;
+                    backButton.onclick = this.onBack;
     },
 
+    updateSort: function(sort) {
+            console.log("updating  sort");
+            var files  = this.state.files
+                    var lastSort = this.state.sort;
+                    if  (lastSort == sort) { 
+                            console.log("reversing  files");
+                            files = files.reverse();
+                    }
+                    else {
+                            console.log("new sort");
+                            files = files.sort(sort);
+                    }
+            this.setState({files: files, sort: sort,  paths: this.state.paths});
+    },
     timeSort: function() {
-            this.setState({files: this.state.files.sort(File.timeSort)});
+            this.updateSort(File.timeSort);
     },
     pathSort: function() {
-            this.setState({files: this.state.files.sort(File.pathSort)});
+            this.updateSort(File.pathSort);
     },
     sizeSort: function() {
-            this.setState({files: this.state.files.sort(File.sizeSort)});
+            this.updateSort(File.sizeSort);
     },
     updatePath: function(path) {
-        this.loadFilesFromServer(path);
+            this.loadFilesFromServer(path);
     },
     getContent: function(path) {
-       var url = buildGetContentUrl(path);
-       console.log("path "+ path +" url "+ url);
-        $.get({url: url});
+            var url = buildGetContentUrl(path);
+            console.log("path "+ path +" url "+ url);
+            $.get({url: url});
     },
     render: function() {
             var files = this.state.files.map(function(f) {
@@ -91,11 +109,11 @@ var FileList = React.createClass({
                             this.updatePath(f.path);
                     }.bind(this) :
                             function(event) {
-                                this.getContent(f.path);
+                                    this.getContent(f.path);
                             }.bind(this)
-                    return (<File onClick={onClick} path={f.path} isdir={f.isdir} size={f.size} time={f.time}/>)
+                            return (<File onClick={onClick} path={f.path} isdir={f.isdir} size={f.size} time={f.time}/>)
             }.bind(this));
-            
+
             return (<table className="table table-responsive table-hover">
                             <thead><tr>
                             <th onClick={this.pathSort}>Path</th>

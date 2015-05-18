@@ -27,10 +27,16 @@ TODO:
             reload with new path
         file on click
             download
+        
+        inverse sort on cols
+        up button
+        download file
+        upload file
 
     nav-bar
         back button
         upload
+        parent dir
 
     poll for updates
 
