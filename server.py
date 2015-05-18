@@ -37,11 +37,15 @@ def get_children():
     return jsonify({"path": p,
                     "children": children})
 
-#@app.route("/upload", methods=['POST'])
-#def upload_file():
-#    path = request.args.get("path")
-#    name = request.args.get("name")
-#    return    
+@app.route("/upload", methods=['POST'])
+def upload_file():
+    path = request.args.get("path")
+    name = request.args.get("name")
+    uploaded = request.files["file"]
+    uploadedPath = os.path.join(path, name)
+    uploaded.save(uploadedPath)
+    print("file uploaded to "+ uploadedPath)
+    return jsonify({"status":"success"})
 
 if __name__ == '__main__':
     app.debug = True

@@ -24,28 +24,15 @@ function buildGetContentUrl(path) {
 }
 
 function buildUploadUrl(path, name) {
-        return  "upload?path="+path+"&name="+name;
+        return "upload?path="+path+"&name="+name;
 }
 
-function uploadFile(evt) {
-        var readFile = evt.target.files[0];
-        var name = readFile.name;
-        console.log(readFile);
-        var reader = new FileReader();
-        reader.onload = function(e) {
-                var text = reader.result;
-                console.log(text);
-                //TODO upload the file here
-        };
-        // Read file
-        reader.readAsText(readFile, "UTF-8");
-}
 
 var FileList = React.createClass({
         getInitialState: function() {
                 return {paths : ["/"],
                         files: [],
-                        sort: File.pathSort};
+    sort: File.pathSort};
         },
 
     loadFilesFromServer: function(path) {
@@ -61,7 +48,7 @@ var FileList = React.createClass({
                     this.setState(
                             {files: files, 
                                     paths: paths,
-                                    sort: this.state.sort});
+                            sort: this.state.sort});
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -83,27 +70,54 @@ var FileList = React.createClass({
     },
 
     onUpload: function() {
-        $('#uploadInput').click();
+            $('#uploadInput').click();
     },
-    
+
+    uploadFile: function() {
+        return function (evt) {
+                var path = this.currentPath();
+                var readFile = evt.target.files[0];
+                var name = readFile.name;
+                console.log(readFile);
+
+                var formData = new FormData();
+                formData.append("file", readFile, name);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', buildUploadUrl(path, name) , true);
+                xhr.onreadystatechange=function()
+                {
+                        if (xhr.readyState != 4)
+                                return;
+
+                        if (xhr.status == 200) 
+                                alert("Successfully uploaded file "+ name +" to "+ path); 
+                        else
+                                console.log(request.status);
+                };
+                xhr.send(formData);
+        }.bind(this)
+    },
+
     componentDidMount: function() {
-            this.loadFilesFromServer(this.currentPath());
+            var path = this.currentPath();
+            this.loadFilesFromServer(path);
             var backButton = document.getElementById("backButton")
                     backButton.onclick = this.onBack;
             var uploadButton = document.getElementById("uploadButton")
                     uploadButton.onclick = this.onUpload;
             var uploadInput = document.getElementById("uploadInput")  
-            uploadInput.addEventListener("change", uploadFile, false);
+            uploadInput.addEventListener("change", this.uploadFile(), false);
     },
 
     updateSort: function(sort) {
             var files  = this.state.files
                     var lastSort = this.state.sort;
-                    if  (lastSort == sort)  
-                            files = files.reverse();
-                    else 
-                            files = files.sort(sort);
-                    
+            if  (lastSort == sort)  
+                    files = files.reverse();
+            else 
+                    files = files.sort(sort);
+
             this.setState({files: files, sort: sort,  paths: this.state.paths});
     },
     timeSort: function() {
