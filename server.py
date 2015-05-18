@@ -1,6 +1,6 @@
 import json
 import os, os.path
-from flask import Flask, Response, request, jsonify
+from flask import Flask, Response, request, jsonify, send_file
 
 app = Flask(__name__, static_url_path='', static_folder='public')
 app.add_url_rule('/', 'root', lambda: app.send_static_file('index.html'))
@@ -19,7 +19,11 @@ def get_path():
 @app.route("/content")
 def get_content():
     p = request.args.get("path")
-    return app.send_file(p)
+    name = os.path.basename(p)
+
+    return send_file(p, 
+            attachment_filename=name,
+            as_attachment=True)
 
 @app.route("/parent")
 def get_parent():

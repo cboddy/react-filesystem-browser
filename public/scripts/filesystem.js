@@ -73,17 +73,13 @@ var FileList = React.createClass({
     },
 
     updateSort: function(sort) {
-            console.log("updating  sort");
             var files  = this.state.files
                     var lastSort = this.state.sort;
-                    if  (lastSort == sort) { 
-                            console.log("reversing  files");
+                    if  (lastSort == sort)  
                             files = files.reverse();
-                    }
-                    else {
-                            console.log("new sort");
+                    else 
                             files = files.sort(sort);
-                    }
+                    
             this.setState({files: files, sort: sort,  paths: this.state.paths});
     },
     timeSort: function() {
@@ -100,8 +96,7 @@ var FileList = React.createClass({
     },
     getContent: function(path) {
             var url = buildGetContentUrl(path);
-            console.log("path "+ path +" url "+ url);
-            $.get({url: url});
+            location.href=url;
     },
     render: function() {
             var files = this.state.files.map(function(f) {
