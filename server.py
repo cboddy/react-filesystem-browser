@@ -24,7 +24,6 @@ def get_content():
     return send_file(p, 
             attachment_filename=name,
             as_attachment=True)
-
 @app.route("/parent")
 def get_parent():
     p = request.args.get("path")
@@ -37,6 +36,13 @@ def get_children():
     children = map(lambda x : toPath(os.path.join(p, x)), os.listdir(p))
     return jsonify({"path": p,
                     "children": children})
+
+#@app.route("/upload", methods=['POST'])
+#def upload_file():
+#    path = request.args.get("path")
+#    name = request.args.get("name")
+#    return    
+
 if __name__ == '__main__':
     app.debug = True
     app.run(port=int(os.environ.get("PORT",3000)))

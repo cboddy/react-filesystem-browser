@@ -23,6 +23,24 @@ function buildGetContentUrl(path) {
         return "content?path="+path;
 }
 
+function buildUploadUrl(path, name) {
+        return  "upload?path="+path+"&name="+name;
+}
+
+function uploadFile(evt) {
+        var readFile = evt.target.files[0];
+        var name = readFile.name;
+        console.log(readFile);
+        var reader = new FileReader();
+        reader.onload = function(e) {
+                var text = reader.result;
+                console.log(text);
+                //TODO upload the file here
+        };
+        // Read file
+        reader.readAsText(readFile, "UTF-8");
+}
+
 var FileList = React.createClass({
         getInitialState: function() {
                 return {paths : ["/"],
@@ -63,13 +81,19 @@ var FileList = React.createClass({
             this.state.paths = this.state.paths.slice(0,-1);
             this.loadFilesFromServer(this.currentPath());
     },
-    onUpload: function() {
 
+    onUpload: function() {
+        $('#uploadInput').click();
     },
+    
     componentDidMount: function() {
             this.loadFilesFromServer(this.currentPath());
             var backButton = document.getElementById("backButton")
                     backButton.onclick = this.onBack;
+            var uploadButton = document.getElementById("uploadButton")
+                    uploadButton.onclick = this.onUpload;
+            var uploadInput = document.getElementById("uploadInput")  
+            uploadInput.addEventListener("change", uploadFile, false);
     },
 
     updateSort: function(sort) {
