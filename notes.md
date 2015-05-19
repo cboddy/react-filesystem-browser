@@ -22,17 +22,20 @@ fileComponent:
 
 TODO: 
     Make table pretty
-        sort by cols, re-render
-        dir on click
-            reload with new path
-        file on click
-            download
-        
-        inverse sort on cols
         up button
         download file
         upload file
-
+        
+        remember context on back
+        
+        navbar with glypth icons
+            back, forward, rename, delete
+        
+        glyphs on table header 
+        
+        pretty print file size
+        
+        glyphs on rows for folders / files
     nav-bar
         back button
         upload
