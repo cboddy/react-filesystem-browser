@@ -12,7 +12,10 @@ return (<tr onClick={this.props.onClick} ref={this.props.path}>
         </tr>);
         }
 });
-
+// pathSpan
+// upButton
+// forwarddButton
+//
 File.timeSort = function(left, right){return left.time - right.time;} 
 
 File.sizeSort = function(left, right){return left.size - right.size;} 
@@ -44,6 +47,10 @@ function buildUploadUrl(path, name) {
         return "upload?path="+path+"&name="+name;
 }
 
+function updateNavbarPath(path) {
+    var elem  = document.getElementById("pathSpan");
+    elem.text = path;
+}
 
 var FileList = React.createClass({
         getInitialState: function() {
@@ -66,6 +73,7 @@ var FileList = React.createClass({
                             {files: files, 
                                     paths: paths,
                             sort: this.state.sort});
+                    updateNavbarPath(this.currentPath());
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());

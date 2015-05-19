@@ -21,6 +21,11 @@ fileComponent:
 
 
 TODO: 
+
+    add path to navbar
+    
+    file entrys go to names
+
     Make table pretty
         up button
         download file
