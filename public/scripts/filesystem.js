@@ -2,9 +2,11 @@
 var File = React.createClass({
         render: function() {
                 var dateString =  new Date(this.props.time*1000).toGMTString()
-        var className = this.props.isdir ? "label-info" : "";
-return (<tr onClick={this.props.onClick} className={className} ref={this.props.path} >
-        <td>{this.props.path}</td>
+        var glyphClass = "glyphicon "; 
+        glyphClass += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-cloud-download";
+
+return (<tr onClick={this.props.onClick} ref={this.props.path}>
+        <td><span className={glyphClass}/>{"   "+this.props.path}</td>
         <td>{this.props.size}</td>
         <td>{dateString}</td>
         </tr>);
@@ -147,7 +149,7 @@ var FileList = React.createClass({
                             return (<File onClick={onClick} path={f.path} isdir={f.isdir} size={f.size} time={f.time}/>)
             }.bind(this));
 
-            return (<table className="table table-responsive table-hover">
+            return (<table className="table table-responsive table-striped table-hover">
                             <thead><tr>
                             <th onClick={this.pathSort}>Path</th>
                             <th onClick={this.sizeSort}>Size</th>
