@@ -3,7 +3,7 @@ var File = React.createClass({
         render: function() {
                 var dateString =  new Date(this.props.time*1000).toGMTString()
         var glyphClass = "glyphicon "; 
-glyphClass += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-cloud-download";
+glyphClass += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-download";
 
 return (<tr onClick={this.props.onClick} ref={this.props.path}>
         <td><span className={glyphClass}/>{"   "+this.props.path}</td>
