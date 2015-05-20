@@ -6,7 +6,7 @@ var File = React.createClass({
 glyphClass += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-download";
 
 return (<tr onClick={this.props.onClick} ref={this.props.path}>
-        <td><span className={glyphClass}/>{"   "+this.props.path}</td>
+        <td><span className={glyphClass}/>{"   "+this.props.name}</td>
         <td>{File.sizeString(this.props.size)}</td>
         <td>{dateString}</td>
         </tr>);
@@ -194,7 +194,7 @@ var FileList = React.createClass({
                             function(event) {
                                     this.getContent(f.path);
                             }.bind(this)
-                            return (<File onClick={onClick} path={f.path} isdir={f.isdir} size={f.size} time={f.time}/>)
+                            return (<File onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time}/>)
             }.bind(this));
 
             var sortGlyph = "glyphicon glyphicon-sort";

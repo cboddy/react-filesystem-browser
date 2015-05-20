@@ -7,9 +7,10 @@ app.add_url_rule('/', 'root', lambda: app.send_static_file('index.html'))
 
 def toPath(p):
     return {"path": p,
-             "time": os.path.getmtime(p),
-             "isdir": os.path.isdir(p),
-             "size":os.path.getsize(p)}
+            "name": os.path.basename(p),
+            "time": os.path.getmtime(p),
+            "isdir": os.path.isdir(p),
+            "size":os.path.getsize(p)}
   
 @app.route("/stat")
 def get_path():
