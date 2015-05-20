@@ -135,8 +135,10 @@ var FileList = React.createClass({
                             if (xhr.readyState != 4)
                                     return;
 
-                            if (xhr.status == 200) 
+                            if (xhr.status == 200){ 
                                     alert("Successfully uploaded file "+ name +" to "+ path); 
+                                    this.loadFilesFromServer(path);
+                            }
                             else
                                     console.log(request.status);
                     };
