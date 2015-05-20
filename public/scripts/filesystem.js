@@ -1,15 +1,37 @@
 
 var File = React.createClass({
-        render: function() {
-                var dateString =  new Date(this.props.time*1000).toGMTString()
-        var glyphClass = "glyphicon "; 
-glyphClass += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-download";
+        glyphClass: function() {
+            var className = "glyphicon "; 
+            className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-download";
+            return className;
+        },
+        
+        renderGrid: function() {
+            var glyphClass = this.glyphClass();
+            return (<div onClick={this.props.onClick} ref={this.props.path} className="col-xs-6 col-md-3">
+                            <a>
+                                <span style={{fontSize:"3.5em"}} className={glyphClass}/>
+                            </a>
+                            <div className="caption">
+                                <h4>{this.props.name}</h4>
+                            </div>
+                        </div>)
 
-return (<tr onClick={this.props.onClick} ref={this.props.path}>
-        <td><span className={glyphClass}/>{"   "+this.props.name}</td>
-        <td>{File.sizeString(this.props.size)}</td>
-        <td>{dateString}</td>
-        </tr>);
+        },
+        
+        renderList: function() {
+                var dateString =  new Date(this.props.time*1000).toGMTString()
+                var glyphClass = this.glyphClass();
+        
+                return (<tr onClick={this.props.onClick} ref={this.props.path}>
+                            <td><span className={glyphClass}/>{"   "+this.props.name}</td>
+                            <td>{File.sizeString(this.props.size)}</td>
+                            <td>{dateString}</td>
+                        </tr>);
+        },
+        
+        render: function() {
+                return this.props.gridView ? this.renderGrid() : this.renderList();
         }
 });
 
@@ -68,7 +90,8 @@ var FileList = React.createClass({
         getInitialState: function() {
                 return {paths : ["/"],
                         files: [],
-    sort: File.pathSort};
+                        sort: File.pathSort,
+                        gridView: true};
         },
 
     loadFilesFromServer: function(path) {
@@ -84,7 +107,8 @@ var FileList = React.createClass({
                     this.setState(
                             {files: files, 
                                     paths: paths,
-                            sort: this.state.sort});
+                            sort: this.state.sort,
+                            gridView: this.state.gridView});
                     updateNavbarPath(this.currentPath());
             }.bind(this),
             error: function(xhr, status, err) {
@@ -117,6 +141,16 @@ var FileList = React.createClass({
             }.bind(this);
             getParent(this.currentPath(), onSuccess);
     },
+    
+    alternateView: function() {
+            var updatedView = !  this.state.gridView;
+            
+            this.setState({files: this.state.files, 
+                    sort: this.state.sort,  
+                    paths: this.state.paths, 
+                    gridView: updatedView});
+    },
+
 
     uploadFile: function() {
             return function (evt) {
@@ -147,14 +181,16 @@ var FileList = React.createClass({
     componentDidMount: function() {
             var path = this.currentPath();
             this.loadFilesFromServer(path);
-            var backButton = document.getElementById("backButton")
+            var backButton = document.getElementById("backButton");
                     backButton.onclick = this.onBack;
-            var uploadButton = document.getElementById("uploadButton")
+            var uploadButton = document.getElementById("uploadButton");
                     uploadButton.onclick = this.onUpload;
-            var parentButton = document.getElementById("parentButton")
+            var parentButton = document.getElementById("parentButton");
                     parentButton.onclick = this.onParent;
-            var uploadInput = document.getElementById("uploadInput")  
+            var uploadInput = document.getElementById("uploadInput"); 
                     uploadInput.addEventListener("change", this.uploadFile(), false);
+            var alternateViewButton = document.getElementById("alternateViewButton"); 
+            alternateViewButton.onclick = this.alternateView; 
     },
 
     updateSort: function(sort) {
@@ -165,8 +201,9 @@ var FileList = React.createClass({
             else 
                     files = files.sort(sort);
 
-            this.setState({files: files, sort: sort,  paths: this.state.paths});
+            this.setState({files: files, sort: sort,  paths: this.state.paths, gridView: this.state.gridView});
     },
+
     timeSort: function() {
             this.updateSort(File.timeSort);
     },
@@ -191,8 +228,17 @@ var FileList = React.createClass({
                             function(event) {
                                     this.getContent(f.path);
                             }.bind(this)
-                            return (<File onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time}/>)
+                            return (<File gridView={this.state.gridView} onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time}/>)
             }.bind(this));
+
+            var gridGlyph = "glyphicon glyphicon-th-large";
+            var listGlyph = "glyphicon glyphicon-list";
+            var element = document.getElementById("altViewSpan");
+            var className = this.state.gridView ? listGlyph : gridGlyph;
+            element.className = className;
+            
+            if (this.state.gridView) 
+                return (<div>{files}</div>)
 
             var sortGlyph = "glyphicon glyphicon-sort";
             return (<table className="table table-responsive table-striped table-hover">
