@@ -25,6 +25,7 @@ def get_content():
     return send_file(p, 
             attachment_filename=name,
             as_attachment=True)
+
 @app.route("/parent")
 def get_parent():
     p = request.args.get("path")
@@ -45,7 +46,6 @@ def upload_file():
     uploaded = request.files["file"]
     uploadedPath = os.path.join(path, name)
     uploaded.save(uploadedPath)
-    print("file uploaded to "+ uploadedPath)
     return jsonify({"status":"success"})
 
 if __name__ == '__main__':

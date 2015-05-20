@@ -12,10 +12,7 @@ return (<tr onClick={this.props.onClick} ref={this.props.path}>
         </tr>);
         }
 });
-// pathSpan
-// upButton
-// forwarddButton
-//
+
 File.timeSort = function(left, right){return left.time - right.time;} 
 
 File.sizeSort = function(left, right){return left.size - right.size;} 
@@ -64,12 +61,12 @@ function getParent(path, onSuccess) {
 
 function updateNavbarPath(path) {
     var elem  = document.getElementById("pathSpan");
-    elem.text = path;
+    elem.innerHTML = '<span class="glyphicon glyphicon-chevron-right"/>' +path;
 }
 
 var FileList = React.createClass({
         getInitialState: function() {
-                return {paths : ["/home/chris"],
+                return {paths : ["/"],
                         files: [],
     sort: File.pathSort};
         },
