@@ -39,12 +39,27 @@ function buildGetChildrenUrl(path) {
         return  "children?path="+path;
 }
 
+function buildGetParentUrl(path) {
+        return  "parent?path="+path;
+}
 function buildGetContentUrl(path) {
         return "content?path="+path;
 }
 
 function buildUploadUrl(path, name) {
         return "upload?path="+path+"&name="+name;
+}
+
+function getParent(path, onSuccess) {
+            $.ajax({
+                    url: buildGetParentUrl(path),
+            dataType: 'json',
+            cache: false,
+            success: onSuccess,
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
 }
 
 function updateNavbarPath(path) {
@@ -98,6 +113,14 @@ var FileList = React.createClass({
             $('#uploadInput').click();
     },
 
+    onParent: function() {
+            var onSuccess = function(data) {
+                var parentPath = data.path;
+                this.updatePath(parentPath);
+            }.bind(this);
+            getParent(this.currentPath(), onSuccess);
+    },
+
     uploadFile: function() {
             return function (evt) {
                     var path = this.currentPath();
@@ -131,6 +154,8 @@ var FileList = React.createClass({
                     backButton.onclick = this.onBack;
             var uploadButton = document.getElementById("uploadButton")
                     uploadButton.onclick = this.onUpload;
+            var parentButton = document.getElementById("parentButton")
+                    parentButton.onclick = this.onParent;
             var uploadInput = document.getElementById("uploadInput")  
                     uploadInput.addEventListener("change", this.uploadFile(), false);
     },
