@@ -32,6 +32,16 @@ def get_parent():
     parent = os.path.dirname(p)
     return jsonify(toPath(parent))
 
+@app.route("/rename")
+def rename():
+    p = request.args.get("path")
+    
+    name = request.args.get("name")
+    parent = os.path.dirname(p)
+    updated = os.path.join(parent, name)
+    os.rename(p, updated)
+    return jsonify({"status":"success"})
+
 @app.route("/children")
 def get_children():
     p = request.args.get("path")

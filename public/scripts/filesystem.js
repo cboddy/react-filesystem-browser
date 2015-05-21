@@ -149,7 +149,7 @@ var FileList = React.createClass({
             });
     },
 
-    reloadFilesFromServer: function() {this.loadFilesFromServer(this.currentPath()); }.bind(this),
+    reloadFilesFromServer: function() {this.loadFilesFromServer(this.currentPath())},
 
     currentPath : function() {
             return this.state.paths[this.state.paths.length-1]
