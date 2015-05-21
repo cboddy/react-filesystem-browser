@@ -271,7 +271,7 @@ var FileList = React.createClass({
 
     rename: function(path, updatedName) {
             $.ajax({
-                    url: buildRenameUrl(path,  updatedName),//TODO
+                    url: buildRenameUrl(path,  updatedName),
             dataType: 'json',
             cache: false,
             success: this.reloadFilesFromServer,
