@@ -48,6 +48,22 @@ TODO:
 
     poll for updates
 
+    add context menus:
+        folder / file:
+            rename
+            delete
+
+    navbar:
+        no collapse of nav buttons
+
+    server todo:
+        login management 
+
+        cookie management
+
+        security 
+        
+        specifiy address/port/root-dir
 
 ===== Server =====
 
