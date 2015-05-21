@@ -2,7 +2,7 @@
 var File = React.createClass({
         glyphClass: function() {
             var className = "glyphicon "; 
-            className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-download";
+            className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-file";
             return className;
         },
         
@@ -18,15 +18,39 @@ var File = React.createClass({
                         </div>)
 
         },
-        
+       
+        onRemove: function(evt) {
+                var type = this.props.isdir ? "folder" : "file";
+                var remove = confirm("Remove "+type +" '"+ this.props.path +"' ?");
+                if (remove) {
+                   evt.props = this.props;
+                   evt.action = "remove";
+                }
+        },
+       
+        onRename: function(evt) {
+                var type = this.props.isdir ? "folder" : "file";
+                var updatedName = prompt("Enter new name for "+type +" "+this.props.name);
+                if (updatedName != null) {
+                   evt.props = this.props;
+                   evt.action = "rename";
+                   evt.updatedName = updatedName;
+                }
+        },
+
         renderList: function() {
                 var dateString =  new Date(this.props.time*1000).toGMTString()
                 var glyphClass = this.glyphClass();
-        
-                return (<tr onClick={this.props.onClick} ref={this.props.path}>
-                            <td><span className={glyphClass}/>{"   "+this.props.name}</td>
+                var spanStyle = {fontSize:"1.5em"}; 
+                return (<tr id={this.props.path} ref={this.props.path}>
+                            <td>
+                                <a onClick={this.props.onClick}><span style={{fontSize:"1.5em", paddingRight:"10px"}} className={glyphClass}/>{this.props.name}</a>
+                                </td>
                             <td>{File.sizeString(this.props.size)}</td>
                             <td>{dateString}</td>
+                        
+                            <td><a onClick={this.onRename}><span style={spanStyle} className="glyphicon glyphicon-font"/></a></td>
+                            <td><a onClick={this.onRemove}><span style={spanStyle} className="glyphicon glyphicon-remove"/></a></td>
                         </tr>);
         },
         
@@ -60,6 +84,14 @@ function buildGetChildrenUrl(path) {
 
 function buildGetParentUrl(path) {
         return  "parent?path="+path;
+}
+
+function buildRenameUrl(path, name) {
+        return  "rename?path="+path+"&name="+name;
+}
+
+function buildRemoveUrl(path) {
+        return  "remove?path="+path;
 }
 function buildGetContentUrl(path) {
         return "content?path="+path;
@@ -116,6 +148,8 @@ var FileList = React.createClass({
             }.bind(this)
             });
     },
+
+    reloadFilesFromServer: function() {this.loadFilesFromServer(this.currentPath()); }.bind(this),
 
     currentPath : function() {
             return this.state.paths[this.state.paths.length-1]
@@ -222,6 +256,41 @@ var FileList = React.createClass({
             var url = buildGetContentUrl(path);
             location.href=url;
     },
+   
+    remove: function(path) {
+            $.ajax({
+                    url: buildRemoveUrl(path),
+            dataType: 'json',
+            cache: false,
+            success: this.reloadFilesFromServer,
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
+    },
+
+    rename: function(path, updatedName) {
+            $.ajax({
+                    url: buildRenameUrl(path,  updatedName),//TODO
+            dataType: 'json',
+            cache: false,
+            success: this.reloadFilesFromServer,
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
+
+    },
+
+    onListClick: function(evt) {
+            //console.log("click in table for " + JSON.stringify(evt.props));
+            if (evt.action == "remove") 
+                this.remove(evt.props.path);
+            else if (evt.action == "rename")
+                this.rename(evt.props.path, evt.updatedName);
+            else
+                console.log("Warning, unknown action "+ evt.action);
+    },
     render: function() {
             var files = this.state.files.map(function(f) {
                     var onClick = f.isdir ? function(event){
@@ -243,11 +312,13 @@ var FileList = React.createClass({
                 return (<div>{files}</div>)
 
             var sortGlyph = "glyphicon glyphicon-sort";
-            return (<table className="table table-responsive table-striped table-hover">
+            
+            return (<table onClick={this.onListClick}  className="table table-responsive table-striped table-hover">
                             <thead><tr>
                             <th onClick={this.pathSort}><button className="btn btn-default"><span className={sortGlyph}/>Path</button></th>
                             <th onClick={this.sizeSort}><button className="btn btn-default"><span className={sortGlyph}/>Size</button></th>
                             <th onClick={this.timeSort}><button className="btn btn-default"><span className={sortGlyph}/>Last modified time</button></th>
+                            <th/><th/>
                             </tr></thead>
                             <tbody>
                             {files}
