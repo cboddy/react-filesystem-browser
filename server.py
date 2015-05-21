@@ -1,5 +1,5 @@
 import json
-import os, os.path
+import os, os.path, shutil
 from flask import Flask, Response, request, jsonify, send_file
 
 app = Flask(__name__, static_url_path='', static_folder='public')
@@ -31,6 +31,15 @@ def get_parent():
     p = request.args.get("path")
     parent = os.path.dirname(p)
     return jsonify(toPath(parent))
+
+@app.route("/remove")
+def remove():
+    p = request.args.get("path")
+    if os.path.isdir(p):
+        shutil.rmtree(p)
+    else:
+        os.remove(p)
+    return jsonify({"status":"success"})
 
 @app.route("/rename")
 def rename():
