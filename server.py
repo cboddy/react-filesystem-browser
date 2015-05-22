@@ -67,6 +67,13 @@ def upload_file():
     uploaded.save(uploadedPath)
     return jsonify({"status":"success"})
 
+@app.route("/mkdir")
+def mkdir():
+    path = request.args.get("path")
+    name = request.args.get("name")
+    os.mkdir(os.path.join(path, name))
+    return jsonify({"status":"success"})
+
 if __name__ == '__main__':
     app.debug = True
     app.run(port=int(os.environ.get("PORT",3000)))
