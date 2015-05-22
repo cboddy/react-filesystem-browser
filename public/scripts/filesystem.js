@@ -106,11 +106,11 @@ function buildMkdirUrl(path, name) {
 }
 
 function hideLogin() {
-    document.getElementById("login-form").style.display= "none";
+        document.getElementById("login-form").style.display= "none";
 }
 
 function showLogin() {
-    $('#login-form').style.display= "block";
+        $('#login-form').style.display= "block";
 }
 
 function getParent(path, onSuccess) {

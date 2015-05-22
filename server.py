@@ -130,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('-root', type=str, help='Root directory of filesystem accessible.')
     parser.add_argument('-host', type=str, default="0.0.0.0", help='Server host to listen on.')
     parser.add_argument('-port', type=int, default=3000, help='Server port to listen on.')
-    parser.add_argument('-password', type=str, default="reactisgreat", help='Authentication password.')
+    parser.add_argument('-password', type=str, default="PeergosRules!", help='Authentication password.')
     args = parser.parse_args()
 
     app.debug = True
