@@ -27,7 +27,7 @@ def with_path(f):
         try :
             p = toLocalPath(request.args.get("path"))
             print(request.args.get("path"), p)
-            request.path = p 
+            request.norm_path = p 
         except: 
             print(traceback.format_exc())
         return f(*args, **kwds)
@@ -54,7 +54,7 @@ def login():
 @with_path
 @with_login
 def get_content():
-    p = request.path
+    p = request.norm_path
     name = os.path.basename(p)
     
     return send_file(p, 
@@ -65,7 +65,7 @@ def get_content():
 @with_path
 @with_login
 def get_parent():
-    p = request.path 
+    p = request.norm_path 
     if p == app.root:
         parent = p
     else:
@@ -77,7 +77,7 @@ def get_parent():
 @with_path
 @with_login
 def remove():
-    p = request.path 
+    p = request.norm_path 
     if os.path.isdir(p):
         shutil.rmtree(p)
     else:
@@ -88,7 +88,7 @@ def remove():
 @with_path
 @with_login
 def rename():
-    p = request.path
+    p = request.norm_path
     
     name = request.args.get("name")
     parent = os.path.dirname(p)
@@ -97,10 +97,10 @@ def rename():
     return jsonify({"status":"success"})
 
 @app.route("/children")
-@with_path
 @with_login
+@with_path
 def get_children():
-    p = request.path
+    p = request.norm_path
     children = map(lambda x : toPath(os.path.join(p, x)), os.listdir(p))
     return jsonify({"path": p,
                     "children": children})
@@ -109,7 +109,7 @@ def get_children():
 @with_path
 @with_login
 def upload_file():
-    path = request.path
+    path = request.norm_path
     name = request.args.get("name")
     uploaded = request.files["file"]
     uploadedPath = os.path.join(path, name)
@@ -120,21 +120,22 @@ def upload_file():
 @with_path
 @with_login
 def mkdir():
-    path = request.path
+    path = request.norm_path
     name = request.args.get("name")
     os.mkdir(os.path.join(path, name))
     return jsonify({"status":"success"})
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote filesystem server.')
-    parser.add_argument('-root', type=str, help='Root directory of filesystem accessible.')
-    parser.add_argument('-host', type=str, default="0.0.0.0", help='Server host to listen on.')
-    parser.add_argument('-port', type=int, default=3000, help='Server port to listen on.')
-    parser.add_argument('-password', type=str, default="PeergosRules!", help='Authentication password.')
+    parser.add_argument('-root', type=str, required=True , help='root directory of filesystem accessible.')
+    parser.add_argument('-host', type=str, default="0.0.0.0", help='server host to listen on.')
+    parser.add_argument('-port', type=int, default=3000, help='server port to listen on.')
+    parser.add_argument('-password', type=str, default="PeergosRules!", help='client authentication password.')
+    parser.add_argument('-debug', type=bool, default=True, help='debug mode enabled.')
     args = parser.parse_args()
-
-    app.debug = True
+    app.root = os.path.realpath(args.root)
+    print("Filesystem root "+ app.root)
+    app.debug = args.debug 
     app.password = args.password
-    app.root = args.root
     app.secret_key = os.urandom(24)
     app.run(host= args.host ,port=args.port)
