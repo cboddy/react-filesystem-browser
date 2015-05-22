@@ -101,6 +101,10 @@ function buildUploadUrl(path, name) {
         return "upload?path="+path+"&name="+name;
 }
 
+function buildMkdirUrl(path, name) {
+        return "mkdir?path="+path+"&name="+name;
+}
+
 function getParent(path, onSuccess) {
             $.ajax({
                     url: buildGetParentUrl(path),
@@ -225,6 +229,8 @@ var FileList = React.createClass({
                     parentButton.onclick = this.onParent;
             var uploadInput = document.getElementById("uploadInput"); 
                     uploadInput.addEventListener("change", this.uploadFile(), false);
+            var mkdirButton = document.getElementById("mkdirButton"); 
+                    mkdirButton.onclick = this.mkdir;
             var alternateViewButton = document.getElementById("alternateViewButton"); 
             alternateViewButton.onclick = this.alternateView; 
     },
@@ -280,6 +286,23 @@ var FileList = React.createClass({
             }.bind(this)
             });
 
+    },
+
+    mkdir: function() {
+
+            var newFolderName = prompt("Enter new folder name");
+            if (newFolderName == null)
+                return;
+
+            $.ajax({
+                    url: buildMkdirUrl(this.currentPath(),newFolderName),
+            dataType: 'json',
+            cache: false,
+            success: this.reloadFilesFromServer,
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
     },
 
     onListClick: function(evt) {
