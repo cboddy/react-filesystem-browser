@@ -29,15 +29,6 @@ TODO:
 
     implmenet forwardbutton  behaviour
 
-    server todo:
-        login management 
-
-        cookie management
-
-        security 
-        
-        specifiy address/port/root-dir
-
 ===== Server =====
 
 Flask server showing stat info for path 

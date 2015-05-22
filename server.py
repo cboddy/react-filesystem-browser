@@ -1,6 +1,7 @@
 import os, os.path, json, shutil, functools, argparse, traceback
-from flask import Flask, Response, request, jsonify, send_file
-from werkzeug import secure_filename
+from flask import Flask, Response, request, jsonify, send_file,  session
+from werkzeug import secure_filename 
+from werkzeug.exceptions import abort
 
 app = Flask(__name__, static_url_path='', static_folder='public')
 app.add_url_rule('/', 'root', lambda: app.send_static_file('index.html'))
@@ -10,6 +11,15 @@ def toLocalPath(path):
     if os.path.commonprefix([app.root, fsPath]) != app.root:
         raise Exception("Unsafe path "+ fsPath+" is not a  sub-path  of root "+ app.root)
     return fsPath
+
+def with_login(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwds):
+        if not "username" in session:
+            return json.dumps({"status": "error", "message": "Please log in."})
+        request.username = session["username"]
+        return f(*args, **kwds)
+    return wrapper
 
 def with_path(f):
     @functools.wraps(f)
@@ -30,8 +40,19 @@ def toPath(p):
             "isdir": os.path.isdir(p),
             "size":os.path.getsize(p)}
   
+@app.route("/login", methods=['POST'])
+def login():
+    params = request.get_json(force=True)
+    username = params["username"]
+    password = params["password"]
+    if password != app.password:
+        abort(404)
+    session["username"] = username
+    return jsonify({"status":"success"})
+
 @app.route("/content")
 @with_path
+@with_login
 def get_content():
     p = request.path
     name = os.path.basename(p)
@@ -42,6 +63,7 @@ def get_content():
 
 @app.route("/parent")
 @with_path
+@with_login
 def get_parent():
     p = request.path 
     if p == app.root:
@@ -53,6 +75,7 @@ def get_parent():
 
 @app.route("/remove")
 @with_path
+@with_login
 def remove():
     p = request.path 
     if os.path.isdir(p):
@@ -63,6 +86,7 @@ def remove():
 
 @app.route("/rename")
 @with_path
+@with_login
 def rename():
     p = request.path
     
@@ -74,6 +98,7 @@ def rename():
 
 @app.route("/children")
 @with_path
+@with_login
 def get_children():
     p = request.path
     children = map(lambda x : toPath(os.path.join(p, x)), os.listdir(p))
@@ -82,6 +107,7 @@ def get_children():
 
 @app.route("/upload", methods=['POST'])
 @with_path
+@with_login
 def upload_file():
     path = request.path
     name = request.args.get("name")
@@ -92,6 +118,7 @@ def upload_file():
 
 @app.route("/mkdir")
 @with_path
+@with_login
 def mkdir():
     path = request.path
     name = request.args.get("name")
