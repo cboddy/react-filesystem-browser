@@ -21,40 +21,17 @@ fileComponent:
 
 
 TODO: 
-
-    add path to navbar
-    
-    file entrys go to names
-
-    Make table pretty
-        up button
-        download file
-        upload file
-        
-        remember context on back
-        
-        navbar with glypth icons
-            back, forward, rename, delete
-        
-        glyphs on table header 
-        
-        pretty print file size
-        
-        glyphs on rows for folders / files
-    nav-bar
-        back button
-        upload
-        parent dir
-
-    poll for updates
-
-    add context menus:
-        folder / file:
-            rename
-            delete
-
     navbar:
         no collapse of nav buttons
+        add onclick for path 
+
+    make grid-veiw onclicks more specific
+
+    make list-view row header onclicks  more specific
+    
+    have toggle for grid/list view in bar
+
+    implmenet forwardbutton  behaviour
 
     server todo:
         login management 

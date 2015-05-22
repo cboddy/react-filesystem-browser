@@ -8,8 +8,8 @@ var File = React.createClass({
         
         renderGrid: function() {
             var glyphClass = this.glyphClass();
-            return (<div onClick={this.props.onClick} ref={this.props.path} className="col-xs-6 col-md-3">
-                            <a>
+            return (<div ref={this.props.path} className="col-xs-6 col-md-3">
+                            <a onClick={this.props.onClick} >
                                 <span style={{fontSize:"3.5em"}} className={glyphClass}/>
                             </a>
                             <div className="caption">
