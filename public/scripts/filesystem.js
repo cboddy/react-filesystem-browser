@@ -124,7 +124,7 @@ function updateNavbarPath(path) {
 
 var FileList = React.createClass({
         getInitialState: function() {
-                return {paths : ["/"],
+                return {paths : ["."],
                         files: [],
                         sort: File.pathSort,
                         gridView: true};
@@ -213,7 +213,7 @@ var FileList = React.createClass({
                             }
                             else
                                     console.log(request.status);
-                    };
+                    }.bind(this);
                     xhr.send(formData);
             }.bind(this)
     },
@@ -306,14 +306,15 @@ var FileList = React.createClass({
     },
 
     onListClick: function(evt) {
-            //console.log("click in table for " + JSON.stringify(evt.props));
             if (evt.action == "remove") 
                 this.remove(evt.props.path);
             else if (evt.action == "rename")
                 this.rename(evt.props.path, evt.updatedName);
-            else
-                console.log("Warning, unknown action "+ evt.action);
+            else {}
+            evt.action = null;
+            evt.props = null;
     },
+
     render: function() {
             var files = this.state.files.map(function(f) {
                     var onClick = f.isdir ? function(event){

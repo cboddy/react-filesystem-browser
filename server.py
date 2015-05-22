@@ -1,40 +1,60 @@
-import json
-import os, os.path, shutil
+import os, os.path, json, shutil, functools, argparse, traceback
 from flask import Flask, Response, request, jsonify, send_file
+from werkzeug import secure_filename
 
 app = Flask(__name__, static_url_path='', static_folder='public')
 app.add_url_rule('/', 'root', lambda: app.send_static_file('index.html'))
 
+def toLocalPath(path):
+    fsPath  =  os.path.realpath(os.path.join(app.root, path))
+    if os.path.commonprefix([app.root, fsPath]) != app.root:
+        raise Exception("Unsafe path "+ fsPath+" is not a  sub-path  of root "+ app.root)
+    return fsPath
+
+def with_path(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwds):
+        try :
+            p = toLocalPath(request.args.get("path"))
+            print(request.args.get("path"), p)
+            request.path = p 
+        except: 
+            print(traceback.format_exc())
+        return f(*args, **kwds)
+    return wrapper
+
 def toPath(p):
-    return {"path": p,
+    return {"path": os.path.relpath(p, app.root),
             "name": os.path.basename(p),
             "time": os.path.getmtime(p),
             "isdir": os.path.isdir(p),
             "size":os.path.getsize(p)}
   
-@app.route("/stat")
-def get_path():
-    p = request.args.get("path")
-    return jsonify(toPath(p))
-
 @app.route("/content")
+@with_path
 def get_content():
-    p = request.args.get("path")
+    p = request.path
     name = os.path.basename(p)
-
+    
     return send_file(p, 
             attachment_filename=name,
             as_attachment=True)
 
 @app.route("/parent")
+@with_path
 def get_parent():
-    p = request.args.get("path")
-    parent = os.path.dirname(p)
+    p = request.path 
+    if p == app.root:
+        parent = p
+    else:
+        parent = os.path.dirname(p)
+
     return jsonify(toPath(parent))
 
 @app.route("/remove")
+@with_path
 def remove():
-    p = request.args.get("path")
+    p = request.path 
     if os.path.isdir(p):
         shutil.rmtree(p)
     else:
@@ -42,8 +62,9 @@ def remove():
     return jsonify({"status":"success"})
 
 @app.route("/rename")
+@with_path
 def rename():
-    p = request.args.get("path")
+    p = request.path
     
     name = request.args.get("name")
     parent = os.path.dirname(p)
@@ -52,15 +73,17 @@ def rename():
     return jsonify({"status":"success"})
 
 @app.route("/children")
+@with_path
 def get_children():
-    p = request.args.get("path")
+    p = request.path
     children = map(lambda x : toPath(os.path.join(p, x)), os.listdir(p))
     return jsonify({"path": p,
                     "children": children})
 
 @app.route("/upload", methods=['POST'])
+@with_path
 def upload_file():
-    path = request.args.get("path")
+    path = request.path
     name = request.args.get("name")
     uploaded = request.files["file"]
     uploadedPath = os.path.join(path, name)
@@ -68,12 +91,23 @@ def upload_file():
     return jsonify({"status":"success"})
 
 @app.route("/mkdir")
+@with_path
 def mkdir():
-    path = request.args.get("path")
+    path = request.path
     name = request.args.get("name")
     os.mkdir(os.path.join(path, name))
     return jsonify({"status":"success"})
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Remote filesystem server.')
+    parser.add_argument('-root', type=str, help='Root directory of filesystem accessible.')
+    parser.add_argument('-host', type=str, default="0.0.0.0", help='Server host to listen on.')
+    parser.add_argument('-port', type=int, default=3000, help='Server port to listen on.')
+    parser.add_argument('-password', type=str, default="reactisgreat", help='Authentication password.')
+    args = parser.parse_args()
+
     app.debug = True
-    app.run(host="0.0.0.0",port=int(os.environ.get("PORT",3000)))
+    app.password = args.password
+    app.root = args.root
+    app.secret_key = os.urandom(24)
+    app.run(host= args.host ,port=args.port)
