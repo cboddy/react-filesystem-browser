@@ -25,10 +25,6 @@ TODO:
         no collapse of nav buttons
         add onclick for path 
 
-    make grid-veiw onclicks more specific
-
-    make list-view row header onclicks  more specific
-    
     have toggle for grid/list view in bar
 
     implmenet forwardbutton  behaviour

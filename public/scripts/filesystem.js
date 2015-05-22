@@ -338,9 +338,9 @@ var FileList = React.createClass({
             
             return (<table onClick={this.onListClick}  className="table table-responsive table-striped table-hover">
                             <thead><tr>
-                            <th onClick={this.pathSort}><button className="btn btn-default"><span className={sortGlyph}/>Path</button></th>
-                            <th onClick={this.sizeSort}><button className="btn btn-default"><span className={sortGlyph}/>Size</button></th>
-                            <th onClick={this.timeSort}><button className="btn btn-default"><span className={sortGlyph}/>Last modified time</button></th>
+                            <th><button onClick={this.pathSort} className="btn btn-default"><span className={sortGlyph}/>Path</button></th>
+                            <th><button onClick={this.sizeSort} className="btn btn-default"><span className={sortGlyph}/>Size</button></th>
+                            <th><button onClick={this.timeSort} className="btn btn-default"><span className={sortGlyph}/>Last modified time</button></th>
                             <th/><th/>
                             </tr></thead>
                             <tbody>
