@@ -1,14 +1,12 @@
 
 var File = React.createClass({
-        getInitialState: function() {
-                return  {name: this.props.name};
+
+        glyphClass: function() {
+                var className = "glyphicon "; 
+                className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-file";
+                return className;
         },
-    glyphClass: function() {
-            var className = "glyphicon "; 
-            className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-file";
-            return className;
-    },
-    
+
     renderGrid: function() {
             var glyphClass = this.glyphClass();
             return (<div id={this.props.id} ref={this.props.path} className="col-xs-6 col-md-3">
@@ -25,9 +23,19 @@ var File = React.createClass({
             var selector = "#"+this.props.id;
             $(selector).contextmenu({
                     target: '#context-menu',
-                    onItem: this.onRemove,
-                    });
+                    onItem: function(context, evt) {
+                            var selected  =  evt.target.text.trim();
+                            console.log("on item "+ selected);
+                            if  (selected  == "Rename") {
+                                    this.onRename();
+                            } else if (selected  == "Remove")  {
+                                    this.onRemove();
+                            }  else 
+                    console.log("no  action defined for context menu item "+ selected);    
+                    }.bind(this)
+            });
     },
+
 
     remove: function() {
             $.ajax({
@@ -35,8 +43,7 @@ var File = React.createClass({
             dataType: 'json',
             cache: false,
             success: function() {
-                    var node = document.getElementById(this.props.id)
-                    React.unmountComponentAtNode(node);     
+                    this.props.browser.reloadFilesFromServer();
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -50,13 +57,12 @@ var File = React.createClass({
             dataType: 'json',
             cache: false,
             success: function() {
-                    this.setState({name: updatedName});
-            },
+                    this.props.browser.reloadFilesFromServer();
+            }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
             }.bind(this)
             });
-
     },
 
     onRemove: function() {
@@ -158,7 +164,7 @@ function updateNavbarPath(path) {
 
 var Browser = React.createClass({
         getInitialState: function() {
-                return {paths : ["/"],
+                return {paths : ["/home/chris/test"],
                         files: [],
     sort: File.pathSort,
     gridView: true};
@@ -323,8 +329,7 @@ var Browser = React.createClass({
                             function(event) {
                                     this.getContent(f.path);
                             }.bind(this)
-                            console.log("new file with name " + f.name);
-                            return (<File id={id} gridView={this.state.gridView} onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time}/>)
+                            return (<File id={id} gridView={this.state.gridView} onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time} browser={this}/>)
             }.bind(this));
 
             var gridGlyph = "glyphicon glyphicon-th-large";
@@ -337,10 +342,8 @@ var Browser = React.createClass({
             var  contextMenu = (<div id="context-menu">
                             <ul className="dropdown-menu" role="menu">
                             <li><a tabIndex="-1">Rename</a></li>
-                            <li><a tabIndex="-1">Another action</a></li>
-                            <li><a tabIndex="-1">Something else here</a></li>
                             <li className="divider"></li>
-                            <li><a tabIndex="-1">Separated link</a></li>
+                            <li><a tabIndex="-1">Remove</a></li>
                             </ul>
                             </div>);
 
