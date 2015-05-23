@@ -97,7 +97,9 @@ var File = React.createClass({
     }
 });
 
-File.id = function(name) {return name.match(/([a-z]|[0-9])/g).join("");}
+//File.id = function(name) {return name.match(/([a-z]|[0-9])/g).join("");}
+
+File.id = function() {return (Math.pow(2,31) * Math.random())|0; }
 
 File.timeSort = function(left, right){return left.time - right.time;} 
 
