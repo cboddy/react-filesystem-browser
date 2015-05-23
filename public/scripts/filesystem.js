@@ -145,6 +145,14 @@ function buildMkdirUrl(path, name) {
         return "mkdir?path="+path+"&name="+name;
 }
 
+function hideLogin() {
+        document.getElementById("login-form").style.display= "none";
+}
+
+function showLogin() {
+        $('#login-form').style.display= "block";
+}
+
 function getParent(path, onSuccess) {
         $.ajax({
                 url: buildGetParentUrl(path),
@@ -164,7 +172,7 @@ function updateNavbarPath(path) {
 
 var Browser = React.createClass({
         getInitialState: function() {
-                return {paths : ["/home/chris/test"],
+                return {paths : ["."],
                         files: [],
     sort: File.pathSort,
     gridView: true};
@@ -186,6 +194,7 @@ var Browser = React.createClass({
                             sort: this.state.sort,
                             gridView: this.state.gridView});
             updateNavbarPath(this.currentPath());
+            hideLogin();
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -249,13 +258,39 @@ var Browser = React.createClass({
 
                             if (xhr.status == 200){ 
                                     alert("Successfully uploaded file "+ name +" to "+ path); 
-                                    this.loadFilesFromServer(path);
+                                    this.reloadFilesFromServer();
                             }
                             else
                                     console.log(request.status);
-                    };
+                    }.bind(this);
                     xhr.send(formData);
             }.bind(this)
+    },
+
+    loginOnEnter: function(event) {
+            if (event.keyCode === 13) {
+                    this.login();
+                    return false;
+            }
+    },
+
+    login: function() {
+            var user = document.getElementById("login-user-input").value;
+            var password = document.getElementById("login-password-input").value;
+            var json = JSON.stringify({"username": user, "password": password});
+            console.log("post data "+ json);
+            $.ajax({
+                    url: "/login",
+                    type: "POST",
+                    dataType: 'json',
+                    data: json,
+                    cache: false,
+                    success: this.reloadFilesFromServer,
+                    error: function(xhr, status, err) {
+                            console.error(this.props.url, status, err.toString());
+                            alert("Failed authentication.");
+                    }.bind(this)
+            });
     },
 
     componentDidMount: function() {
@@ -273,6 +308,10 @@ var Browser = React.createClass({
             mkdirButton.onclick = this.mkdir;
             var alternateViewButton = document.getElementById("alternateViewButton"); 
             alternateViewButton.onclick = this.alternateView; 
+            var loginButton = document.getElementById("loginButton");
+            loginButton.onclick = this.login; 
+            var passwordInput= document.getElementById("login-password-input");
+            passwordInput.onkeypress=this.loginOnEnter;
     },
 
     updateSort: function(sort) {
