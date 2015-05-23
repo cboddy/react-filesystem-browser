@@ -1,5 +1,6 @@
 
 var File = React.createClass({
+
         glyphClass: function() {
                 var className = "glyphicon "; 
                 className += this.props.isdir ? "glyphicon-folder-open" : "glyphicon-file";
@@ -8,49 +9,86 @@ var File = React.createClass({
 
     renderGrid: function() {
             var glyphClass = this.glyphClass();
-            return (<div ref={this.props.path} className="col-xs-6 col-md-3">
-                    <a onClick={this.props.onClick} >
+            return (<div id={this.props.id} ref={this.props.path} className="col-xs-6 col-md-3">
+                    <a onClick={this.props.onClick}>
                     <span style={{fontSize:"3.5em"}} className={glyphClass}/>
                     </a>
                     <div className="caption">
                     <h4>{this.props.name}</h4>
                     </div>
-                    </div>)
-
+                    </div>);
     },
 
-    onRemove: function(evt) {
+    componentDidMount: function() {
+            var selector = "#"+this.props.id;
+            $(selector).contextmenu({
+                    target: '#context-menu',
+                    onItem: function(context, evt) {
+                            var selected  =  evt.target.text.trim();
+                            console.log("on item "+ selected);
+                            if  (selected  == "Rename") {
+                                    this.onRename();
+                            } else if (selected  == "Remove")  {
+                                    this.onRemove();
+                            }  else 
+                    console.log("no  action defined for context menu item "+ selected);    
+                    }.bind(this)
+            });
+    },
+
+
+    remove: function() {
+            $.ajax({
+                    url: buildRemoveUrl(this.props.path),
+            dataType: 'json',
+            cache: false,
+            success: function() {
+                    this.props.browser.reloadFilesFromServer();
+            }.bind(this),
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
+    },
+
+    rename: function(updatedName) {
+            $.ajax({
+                    url: buildRenameUrl(this.props.path,  updatedName),
+            dataType: 'json',
+            cache: false,
+            success: function() {
+                    this.props.browser.reloadFilesFromServer();
+            }.bind(this),
+            error: function(xhr, status, err) {
+                    console.error(this.props.url, status, err.toString());
+            }.bind(this)
+            });
+    },
+
+    onRemove: function() {
             var type = this.props.isdir ? "folder" : "file";
             var remove = confirm("Remove "+type +" '"+ this.props.path +"' ?");
-            if (remove) {
-                    evt.props = this.props;
-                    evt.action = "remove";
-            }
+            if (remove)     
+                    this.remove();
     },
 
-    onRename: function(evt) {
+    onRename: function() {
             var type = this.props.isdir ? "folder" : "file";
             var updatedName = prompt("Enter new name for "+type +" "+this.props.name);
-            if (updatedName != null) {
-                    evt.props = this.props;
-                    evt.action = "rename";
-                    evt.updatedName = updatedName;
-            }
+            if (updatedName != null) 
+                    this.rename(updatedName);
     },
 
     renderList: function() {
             var dateString =  new Date(this.props.time*1000).toGMTString()
                     var glyphClass = this.glyphClass();
             var spanStyle = {fontSize:"1.5em"}; 
-            return (<tr id={this.props.path} ref={this.props.path}>
+            return (<tr id={this.props.id} ref={this.props.path}>
                             <td>
                             <a onClick={this.props.onClick}><span style={{fontSize:"1.5em", paddingRight:"10px"}} className={glyphClass}/>{this.props.name}</a>
                             </td>
                             <td>{File.sizeString(this.props.size)}</td>
                             <td>{dateString}</td>
-
-                            <td><a onClick={this.onRename}><span style={spanStyle} className="glyphicon glyphicon-font"/></a></td>
-                            <td><a onClick={this.onRemove}><span style={spanStyle} className="glyphicon glyphicon-remove"/></a></td>
                             </tr>);
     },
 
@@ -58,6 +96,8 @@ var File = React.createClass({
             return this.props.gridView ? this.renderGrid() : this.renderList();
     }
 });
+
+File.id = function(name) {return name.match(/([a-z]|[0-9])/g).join("");}
 
 File.timeSort = function(left, right){return left.time - right.time;} 
 
@@ -105,14 +145,6 @@ function buildMkdirUrl(path, name) {
         return "mkdir?path="+path+"&name="+name;
 }
 
-function hideLogin() {
-        document.getElementById("login-form").style.display= "none";
-}
-
-function showLogin() {
-        $('#login-form').style.display= "block";
-}
-
 function getParent(path, onSuccess) {
         $.ajax({
                 url: buildGetParentUrl(path),
@@ -132,7 +164,7 @@ function updateNavbarPath(path) {
 
 var Browser = React.createClass({
         getInitialState: function() {
-                return {paths : ["."],
+                return {paths : ["/home/chris/test"],
                         files: [],
     sort: File.pathSort,
     gridView: true};
@@ -154,7 +186,6 @@ var Browser = React.createClass({
                             sort: this.state.sort,
                             gridView: this.state.gridView});
             updateNavbarPath(this.currentPath());
-            hideLogin();
             }.bind(this),
             error: function(xhr, status, err) {
                     console.error(this.props.url, status, err.toString());
@@ -222,35 +253,9 @@ var Browser = React.createClass({
                             }
                             else
                                     console.log(request.status);
-                    }.bind(this);
+                    };
                     xhr.send(formData);
             }.bind(this)
-    },
-
-    loginOnEnter: function(event) {
-            if (event.keyCode === 13) {
-                    this.login();
-                    return false;
-            }
-    },
-
-    login: function() {
-            var user = document.getElementById("login-user-input").value;
-            var password = document.getElementById("login-password-input").value;
-            var json = JSON.stringify({"username": user, "password": password});
-            console.log("post data "+ json);
-            $.ajax({
-                    url: "/login",
-                    type: "POST",
-                    dataType: 'json',
-                    data: json,
-                    cache: false,
-                    success: this.reloadFilesFromServer,
-                    error: function(xhr, status, err) {
-                            console.error(this.props.url, status, err.toString());
-                            alert("Failed authentication.");
-                    }.bind(this)
-            });
     },
 
     componentDidMount: function() {
@@ -268,10 +273,6 @@ var Browser = React.createClass({
             mkdirButton.onclick = this.mkdir;
             var alternateViewButton = document.getElementById("alternateViewButton"); 
             alternateViewButton.onclick = this.alternateView; 
-            var loginButton = document.getElementById("loginButton");
-            loginButton.onclick = this.login; 
-            var passwordInput= document.getElementById("login-password-input");
-            passwordInput.onkeypress=this.loginOnEnter;
     },
 
     updateSort: function(sort) {
@@ -302,31 +303,6 @@ var Browser = React.createClass({
             location.href=url;
     },
 
-    remove: function(path) {
-            $.ajax({
-                    url: buildRemoveUrl(path),
-            dataType: 'json',
-            cache: false,
-            success: this.reloadFilesFromServer,
-            error: function(xhr, status, err) {
-                    console.error(this.props.url, status, err.toString());
-            }.bind(this)
-            });
-    },
-
-    rename: function(path, updatedName) {
-            $.ajax({
-                    url: buildRenameUrl(path,  updatedName),
-            dataType: 'json',
-            cache: false,
-            success: this.reloadFilesFromServer,
-            error: function(xhr, status, err) {
-                    console.error(this.props.url, status, err.toString());
-            }.bind(this)
-            });
-
-    },
-
     mkdir: function() {
 
             var newFolderName = prompt("Enter new folder name");
@@ -344,25 +320,16 @@ var Browser = React.createClass({
             });
     },
 
-    onListClick: function(evt) {
-            if (evt.action == "remove") 
-                    this.remove(evt.props.path);
-            else if (evt.action == "rename")
-                    this.rename(evt.props.path, evt.updatedName);
-            else {}
-            evt.action = null;
-            evt.props = null;
-    },
-
     render: function() {
             var files = this.state.files.map(function(f) {
+                    var id  =  File.id(f.name);
                     var onClick = f.isdir ? function(event){
                             this.updatePath(f.path);
                     }.bind(this) :
                             function(event) {
                                     this.getContent(f.path);
                             }.bind(this)
-                            return (<File gridView={this.state.gridView} onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time}/>)
+                            return (<File id={id} gridView={this.state.gridView} onClick={onClick} path={f.path} name={f.name} isdir={f.isdir} size={f.size} time={f.time} browser={this}/>)
             }.bind(this));
 
             var gridGlyph = "glyphicon glyphicon-th-large";
@@ -371,22 +338,37 @@ var Browser = React.createClass({
             var className = this.state.gridView ? listGlyph : gridGlyph;
             element.className = className;
 
+            var layout = null;
+            var  contextMenu = (<div id="context-menu">
+                            <ul className="dropdown-menu" role="menu">
+                            <li><a tabIndex="-1">Rename</a></li>
+                            <li className="divider"></li>
+                            <li><a tabIndex="-1">Remove</a></li>
+                            </ul>
+                            </div>);
+
+            layout = null; 
             if (this.state.gridView) 
-                    return (<div>{files}</div>)
+                    return (<div>
+                                    {files}
+                                    {contextMenu}
+                                    </div>)
 
                             var sortGlyph = "glyphicon glyphicon-sort";
 
-            return (<table onClick={this.onListClick}  className="table table-responsive table-striped table-hover">
+            return (<div>
+                            <table className="table table-responsive table-striped table-hover">
                             <thead><tr>
                             <th><button onClick={this.pathSort} className="btn btn-default"><span className={sortGlyph}/>Path</button></th>
                             <th><button onClick={this.sizeSort} className="btn btn-default"><span className={sortGlyph}/>Size</button></th>
                             <th><button onClick={this.timeSort} className="btn btn-default"><span className={sortGlyph}/>Last modified time</button></th>
-                            <th/><th/>
                             </tr></thead>
                             <tbody>
                             {files}
                             </tbody>
-                            </table>)
+                            </table>
+                            {contextMenu}
+                            </div>)
     }
 });
 
