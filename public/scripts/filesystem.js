@@ -14,7 +14,7 @@ var File = React.createClass({
                     <span style={{fontSize:"3.5em"}} className={glyphClass}/>
                     </a>
                     <div className="caption">
-                    <h4>{this.props.name}</h4>
+                    <h4 className="heading">{this.props.name}</h4>
                     </div>
                     </div>);
     },
