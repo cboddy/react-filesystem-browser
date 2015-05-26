@@ -101,7 +101,10 @@ def rename():
 @with_path
 def get_children():
     p = request.norm_path
-    children = map(lambda x : toPath(os.path.join(p, x)), os.listdir(p))
+    #children = filter(lambda x : os.path.isfile(x) or os.path.isdir(x), os.listdir(p)) 
+    children = map(lambda x : os.path.join(p, x), os.listdir(p))
+    children = filter(lambda x : os.path.isfile(x) or os.path.isdir(x), children) 
+    children = map(lambda x : toPath(x), children)
     return jsonify({"path": p,
                     "children": children})
 
